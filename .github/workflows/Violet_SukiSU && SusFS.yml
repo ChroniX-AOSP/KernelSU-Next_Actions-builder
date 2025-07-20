@@ -1,4 +1,4 @@
-name: Build [鞍馬]-Kurama-Violet Kernel with SukiSU and SuSFS
+name: Build Kurama-Violet Kernel with SukiSU and SuSFS
 
 on:
   workflow_dispatch:
@@ -89,18 +89,18 @@ jobs:
     - name: Compress AnyKernel3 folder with Kernel to zip
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/AnyKernel3
-        zip -r $GITHUB_WORKSPACE/AK3-[鞍馬]-Kurama_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
+        zip -r $GITHUB_WORKSPACE/AK3-Kurama_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
 
     - name: Upload Violet Image
       if: env.CHECK_IMAGE == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: [鞍馬]-Kurama_SukiSU-Ultra_${{ env.KSUVER }}
+        name: Kurama_SukiSU-Ultra_${{ env.KSUVER }}
         path: kernel_workspace/android-kernel/out/arch/arm64/boot/Image
 
     - name: Upload Violet AnyKernel3 zip
       if: env.CHECK_IMAGE == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: AK3-[鞍馬]-Kurama[SukiSu]_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}
+        name: AK3-Kurama[SukiSu]_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/AnyKernel3/*
