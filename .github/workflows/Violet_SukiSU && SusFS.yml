@@ -49,11 +49,7 @@ jobs:
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         rm -rf KernelSU-Next
         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-        KSU_VERSION=$(cd SukiSU-Ultra && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
-        echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-        wget https://gitlab.com/simonpunk/susfs4ksu/-/raw/kernel-4.14/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch
-        patch -p1 --forward < 10_enable_susfs_for_ksu.patch || true
-
+  
     - name: Build Violet kernel with SukiSu
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
