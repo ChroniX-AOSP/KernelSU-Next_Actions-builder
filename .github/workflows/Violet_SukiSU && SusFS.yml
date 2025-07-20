@@ -49,7 +49,7 @@ jobs:
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         rm -rf KernelSU-Next
         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s non-gki
-        KSU_VERSION=$(cd SukiSU-Ultra && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
+        KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
         echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
   
     - name: Build Violet kernel with SukiSu
