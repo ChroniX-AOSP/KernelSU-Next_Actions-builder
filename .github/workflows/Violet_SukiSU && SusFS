@@ -1,4 +1,4 @@
-name: Build LineageOS 22.2 gta4xl/wifi Kernel with KernelSU-Next and SuSFS
+name: Build [鞍馬]-Kurama-Violet Kernel with SukiSU and SuSFS
 
 on:
   workflow_dispatch:
@@ -40,21 +40,21 @@ jobs:
     - name: Download kernel source
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone --recursive https://github.com/selfmusing/kernel_xiaomi_violet.git -b brickport android-kernel --depth=1
+        git clone --recursive https://github.com/ChroniX-AOSP/kernel_xiaomi_violet.git -b SukiSU android-kernel --depth=1
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel/scripts
         sed -i 's/ -dirty//g' setlocalversion
 
-    - name: Setup KernelSU Next then patch for SuSFS
+    - name: Setup SukiSU then patch for SuSFS
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         rm -rf KernelSU-Next
-        curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
-        KSU_VERSION=$(cd KernelSU-Next && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+        KSU_VERSION=$(cd SukiSU-Ultra && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
         echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
         wget https://gitlab.com/simonpunk/susfs4ksu/-/raw/kernel-4.14/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch
         patch -p1 --forward < 10_enable_susfs_for_ksu.patch || true
 
-    - name: Build gta4xl kernel with KernelSU Next
+    - name: Build Violet kernel with SukiSu
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         export ARCH=arm64
@@ -82,77 +82,25 @@ jobs:
       if: env.CHECK_IMAGE == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone https://github.com/JacoaFur/AnyKernel3-Fork.git -b gta4xl --depth=1 AnyKernel3
+        git clone https://github.com/ChroniX-AOSP/AnyKernel3.git --depth=1 AnyKernel3
         cp android-kernel/out/arch/arm64/boot/Image AnyKernel3/
         rm -rf AnyKernel3/.git*
 
     - name: Compress AnyKernel3 folder with Kernel to zip
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/AnyKernel3
-        zip -r $GITHUB_WORKSPACE/AK3-LOS22.2-gta4xl_KernelSU-Next_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
+        zip -r $GITHUB_WORKSPACE/AK3-[鞍馬]-Kurama_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
 
-    - name: Upload gta4xl Image
+    - name: Upload Violet Image
       if: env.CHECK_IMAGE == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: Image-LOS22.2-gta4xl_KernelSU-Next_${{ env.KSUVER }}
+        name: [鞍馬]-Kurama_SukiSU-Ultra_${{ env.KSUVER }}
         path: kernel_workspace/android-kernel/out/arch/arm64/boot/Image
 
-    - name: Upload gta4xl AnyKernel3 zip
+    - name: Upload Violet AnyKernel3 zip
       if: env.CHECK_IMAGE == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: AK3-LOS22.2-gta4xl_KernelSU-Next_${{ env.KSUVER }}-${{ env.BUILD_TIME }}
-        path: kernel_workspace/AnyKernel3/*
-
-    - name: Build gta4xlwifi kernel with KernelSU Next
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        export ARCH=arm64
-        export SUBARCH=arm
-        export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc-64/bin:$GITHUB_WORKSPACE/kernel_workspace/gcc-32/bin:$PATH
-        export KBUILD_BUILD_HOST=Github-Action
-        export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
-        BA_CMD="CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-"
-        EX_CMD="LD=ld.lld LLVM=1 LLVM_IAS=1"
-        DEFCONFIG="vendor/violet-perf_defconfig"
-        make O=out ARCH=arm64 CC=clang $BA_CMD $EX_CMD $DEFCONFIG
-        make -j$(nproc --all) O=out ARCH=arm64 CC=clang $BA_CMD $EX_CMD
-
-    - name: Check kernel output files for Kernel
-      run: |
-       cd $GITHUB_WORKSPACE/kernel_workspace
-       if [ -f android-kernel/out/arch/arm64/boot/Image ]; then
-           echo "CHECK_IMAGE_1=true" >> $GITHUB_ENV
-       else
-           echo "Kernel output file is empty"
-           exit 1
-       fi
-
-    - name: Make AnyKernel3 with Kernel
-      if: env.CHECK_IMAGE_1 == 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
-        rm -rf AnyKernel3
-        git clone https://github.com/JacoaFur/AnyKernel3-Fork.git -b gta4xl --depth=1 AnyKernel3
-        cp android-kernel/out/arch/arm64/boot/Image AnyKernel3/
-        rm -rf AnyKernel3/.git*
-
-    - name: Compress AnyKernel3 folder with Kernel to zip
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/AnyKernel3
-        zip -r $GITHUB_WORKSPACE/AK3-LOS22.2-gta4xlwifi_KernelSU-Next_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
-
-    - name: Upload gta4xlwifi Image
-      if: env.CHECK_IMAGE_1 == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: Image-LOS22.2-gta4xlwifi_KernelSU-Next_${{ env.KSUVER }}
-        path: kernel_workspace/android-kernel/out/arch/arm64/boot/Image
-
-    - name: Upload gta4xlwifi AnyKernel3 zip
-      if: env.CHECK_IMAGE_1 == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AK3-LOS22.2-gta4xlwifi_KernelSU-Next_${{ env.KSUVER }}-${{ env.BUILD_TIME }}
+        name: AK3-[鞍馬]-Kurama[SukiSu]_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/AnyKernel3/*
