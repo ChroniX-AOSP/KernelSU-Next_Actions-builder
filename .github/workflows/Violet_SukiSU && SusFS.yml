@@ -40,7 +40,7 @@ jobs:
     - name: Download kernel source
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone --recursive https://github.com/Chronix-AOSP/kernel_xiaomi_violet.git -b main android-kernel --depth=1
+        git clone --recursive https://github.com/Chronix-AOSP/kernel_xiaomi_violet.git -b SukiSU android-kernel --depth=1
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel/scripts
         sed -i 's/ -dirty//g' setlocalversion
 
