@@ -1,4 +1,4 @@
-name: Build Kurama-Violet Kernel with SukiSU and SuSFS
+name: Build Perf-Violet Kernel with KSU-Nxt and SuSFS
 
 on:
   workflow_dispatch:
@@ -40,21 +40,21 @@ jobs:
     - name: Download kernel source
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone --recursive https://github.com/ChroniX-AOSP/kernel_xiaomi_violet.git -b SukiSU android-kernel --depth=1 
+        git clone --recursive https://github.com/perf/kernel_xiaomi_violet.git android-kernel --depth=1 
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel/scripts
         sed -i 's/ -dirty//g' setlocalversion
 
-    - name: Setup SukiSU then patch for SuSFS
+    - name: Setup Ksu-Nxt then patch for SuSFS
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         rm -rf KernelSU-Next
-        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next-susfs-a13-5.15-dev
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
         KSU_VERSION=$(cd KernelSU-Next && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
         echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
         wget https://gitlab.com/simonpunk/susfs4ksu/-/raw/kernel-4.14/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch
         patch -p1 --forward < 10_enable_susfs_for_ksu.patch || true
        
-    - name: Build Violet kernel with SukiSu
+    - name: Build Violet kernel with Ksu-nxt
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         export ARCH=arm64
@@ -89,7 +89,7 @@ jobs:
     - name: Compress AnyKernel3 folder with Kernel to zip
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/AnyKernel3
-        zip -r $GITHUB_WORKSPACE/AK3-Kurama_SukiSU-Ultra_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
+        zip -r $GITHUB_WORKSPACE/AK3-Perf_Ksu-NXT_${{ env.KSUVER }}-${{ env.BUILD_TIME }}.zip ./*
 
     - name: Upload Violet Image
       if: env.CHECK_IMAGE == 'true'
